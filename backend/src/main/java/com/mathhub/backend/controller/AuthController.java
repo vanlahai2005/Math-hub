@@ -1,5 +1,6 @@
 package com.mathhub.backend.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,12 +19,8 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        try {
-            userService.registerUser(request);
-            return ResponseEntity.ok("Đăng ký tài khoản thành công!");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+        userService.registerUser(request);
+        return ResponseEntity.ok("Đăng ký tài khoản thành công!");
     }
 }
