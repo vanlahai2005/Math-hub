@@ -30,7 +30,7 @@ function Footer() {
       </div>
       <div className="footer-bottom">
         <span>© 2026 MathHub. All rights reserved.</span>
-        <span>Dữ liệu hiện đang là dữ liệu tĩnh.</span>
+        <span>Dữ liệu khóa học được tải từ backend API.</span>
       </div>
     </footer>
   )

@@ -1,4 +1,6 @@
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
+import { fetchCourses } from './api/courses'
 import CourseCard from './components/CourseCard'
 import Footer from './components/Footer'
 import Navbar from './components/Navbar'
@@ -24,7 +26,7 @@ function CourseSection({ id, title, subtitle, courses, linkText }) {
 
       <div className="course-grid">
         {courses.map((course) => (
-          <CourseCard course={course} key={course.title} />
+          <CourseCard course={course} key={course.id ?? course.title} />
         ))}
       </div>
     </section>
@@ -32,6 +34,34 @@ function CourseSection({ id, title, subtitle, courses, linkText }) {
 }
 
 function App() {
+  const [courses, setCourses] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    fetchCourses()
+      .then((data) => {
+        setCourses(Array.isArray(data) ? data : [])
+        setError(null)
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setIsLoading(false))
+  }, [])
+
+  const homepageCourses = useMemo(
+    () => (courses.length > 0 ? courses : [...trendingCourses, ...aiCourses]),
+    [courses],
+  )
+  const featuredCourses = homepageCourses.slice(0, 4)
+  const careerCourses = homepageCourses.slice(4, 8)
+  const skillSectionCourses = careerCourses.length > 0 ? careerCourses : aiCourses
+
+  const dataStatus = isLoading
+    ? 'Đang kết nối backend...'
+    : error
+      ? `Đang hiển thị dữ liệu tĩnh vì API lỗi: ${error}`
+      : 'Dữ liệu khóa học đang được tải từ backend API.'
+
   return (
     <>
       <Navbar />
@@ -43,8 +73,8 @@ function App() {
             <h1>Bắt đầu nâng cấp kỹ năng công nghệ hôm nay</h1>
             <p>
               Khám phá các khóa học AI, lập trình, dữ liệu và sản phẩm số với
-              lộ trình học rõ ràng, nội dung thực hành và dữ liệu hiện đang để
-              tĩnh để dễ thay bằng Supabase sau này.
+              lộ trình học rõ ràng, nội dung thực hành và dữ liệu được kết nối
+              từ backend.
             </p>
             <div className="hero-actions">
               <a className="primary-button" href="#courses">
@@ -69,13 +99,22 @@ function App() {
           </div>
         </section>
 
-        <CourseSection
-          id="courses"
-          title="Khóa học đang nổi bật"
-          subtitle="Các khóa học được chọn để hiển thị trước trên homepage."
-          courses={trendingCourses}
-          linkText="Xem tất cả"
-        />
+        <section className="section" id="courses">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Khóa học nổi bật</p>
+              <h2>Khóa học đang được quan tâm</h2>
+              <p>{dataStatus}</p>
+            </div>
+            <a href="#courses">Xem tất cả</a>
+          </div>
+
+          <div className="course-grid">
+            {featuredCourses.map((course) => (
+              <CourseCard course={course} key={course.id ?? course.title} />
+            ))}
+          </div>
+        </section>
 
         <section className="career-panel" id="paths">
           <div>
@@ -107,8 +146,8 @@ function App() {
         <CourseSection
           id="skills"
           title="Kỹ năng giúp bạn chuyển đổi sự nghiệp"
-          subtitle="Tạm thời hiển thị danh mục tĩnh, sau này có thể map từ database."
-          courses={aiCourses}
+          subtitle="Danh sách này cũng lấy từ backend khi API có dữ liệu đủ cho homepage."
+          courses={skillSectionCourses}
           linkText="Xem khóa học AI"
         />
 
